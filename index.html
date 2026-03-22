@@ -231,7 +231,7 @@ footer span{color:var(--cyan)}
     </div>
   </div>
   <div style="margin-top:18px" class="brow">
-    <button class="btn bs" id="back1" onclick="goTo(1)">&#8592; Back</button>
+    <button class="btn bs" onclick="goTo(1)">&#8592; Back</button>
     <button class="btn bp" id="btn2" onclick="doStep2()"><span class="lbl">Continue &rarr;</span><div class="spin"></div></button>
   </div>
 </div>
@@ -253,7 +253,7 @@ footer span{color:var(--cyan)}
     </div>
   </div>
   <div style="margin-top:18px" class="brow">
-    <button class="btn bs" id="back2" onclick="goTo(2)">&#8592; Back</button>
+    <button class="btn bs" onclick="goTo(2)">&#8592; Back</button>
     <button class="btn bp" id="sbtn" onclick="doStep3()"><span class="lbl">Submit Registration &#10003;</span><div class="spin"></div></button>
   </div>
   <button class="bg-btn" id="skipbtn" onclick="doSkip()" style="margin-top:8px;width:100%;text-align:center">Skip &mdash; register with Technical event only &rarr;</button>
@@ -285,7 +285,7 @@ footer span{color:var(--cyan)}
         </a>
       </div>
     </div>
-    <button class="btn bs" id="resetbtn" onclick="doReset()" style="margin-top:20px;max-width:280px;margin-left:auto;margin-right:auto">&#65291; Register Another Participant</button>
+    <button class="btn bs" onclick="doReset()" style="margin-top:20px;max-width:280px;margin-left:auto;margin-right:auto">&#65291; Register Another Participant</button>
   </div>
 </div>
 </div>
@@ -294,6 +294,7 @@ footer span{color:var(--cyan)}
 <footer>TECHNOVANZA 2026 &nbsp;&middot;&nbsp; Anjalai Ammal Mahalingam Engineering College &nbsp;&middot;&nbsp; <span>symposium@aamec.edu.in</span></footer>
 
 <script>
+// ── CONFIG ────────────────────────────────────────────
 var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyuu455_3i_QC8csABQtm7Ykzi2Gm-qyxa8FCCvCOxkgzb_PZ_AploDKZmztVB_x6_o/exec";
 var WA_LINK    = "https://chat.whatsapp.com/HhRTOv148ZU9KobhO0J7El";
 
@@ -317,6 +318,7 @@ var NONTECH = [
 
 var LIVE_COUNTS = {};
 var S = freshState();
+var _cbCounter = 0; // JSONP callback counter
 
 function freshState(){
   return {
@@ -329,82 +331,102 @@ function freshState(){
   };
 }
 
-// ── FIX: register number must not be all-zeros, must not start with 0 ──
+// ── INPUT SANITIZERS ──────────────────────────────────
 document.getElementById("f-reg").addEventListener("input",function(){
-  this.value = this.value.replace(/\D/g,"");
-  var h = document.getElementById("reg-hint");
-  var n = this.value.length;
-  if(n===0){h.textContent="Exactly 12 digits \u2014 numbers only";h.style.color="";}
+  this.value=this.value.replace(/\D/g,"");
+  var h=document.getElementById("reg-hint"),n=this.value.length;
+  if(!n){h.textContent="Exactly 12 digits \u2014 numbers only";h.style.color="";}
   else if(n<12){h.textContent=n+" / 12 digits";h.style.color="var(--muted2)";}
   else{h.textContent="\u2713 12 digits";h.style.color="var(--green)";}
 });
-
-// ── FIX: phone must be digits only ────────────────────
 document.getElementById("f-phone").addEventListener("input",function(){
-  this.value = this.value.replace(/\D/g,"");
+  this.value=this.value.replace(/\D/g,"");
 });
-
-// ── partner reg fields: digits only ───────────────────
 ["i-reg","r-reg"].forEach(function(id){
-  var el = document.getElementById(id);
-  if(el) el.addEventListener("input",function(){ this.value=this.value.replace(/\D/g,""); });
+  var el=document.getElementById(id);
+  if(el) el.addEventListener("input",function(){this.value=this.value.replace(/\D/g,"");});
 });
 
+// ── VALIDATORS ────────────────────────────────────────
 function isValidReg(r){
-  // Must be exactly 12 digits AND not all zeros AND not start with 0
-  return /^\d{12}$/.test(r) && !/^0/.test(r) && !/^0+$/.test(r);
+  // 12 digits, must not start with 0
+  return /^\d{12}$/.test(r) && r[0]!=="0";
 }
-
 function isValidPhone(p){
-  // 10 digits, must not start with 0 or be all zeros, must start with 6-9
+  // Indian mobile: starts 6-9, 10 digits
   return /^[6-9]\d{9}$/.test(p);
 }
 
+// ── EVENT HELPERS ─────────────────────────────────────
 function getLimitFor(id){
-  var label = idToLabel(id);
+  var label=idToLabel(id);
   if(LIVE_LIMITS[label]) return LIVE_LIMITS[label];
   return (id==="ideathon"||id==="rapidrush") ? TEAM_LIMIT : SOLO_LIMIT;
 }
-
 function idToLabel(id){
-  var all = TECH.concat(NONTECH);
+  var all=TECH.concat(NONTECH);
   for(var i=0;i<all.length;i++) if(all[i].id===id) return all[i].label;
   return id;
 }
-
-function getCount(id){
-  return LIVE_COUNTS[idToLabel(id)]||0;
-}
-
+function getCount(id){ return LIVE_COUNTS[idToLabel(id)]||0; }
 function checkAllTechFull(){
-  for(var i=0;i<TECH.length;i++){
+  for(var i=0;i<TECH.length;i++)
     if(getCount(TECH[i].id)<getLimitFor(TECH[i].id)) return false;
-  }
   return true;
 }
-
 function capHTML(id){
-  var cnt  = getCount(id);
-  var lim  = getLimitFor(id);
-  var pct  = Math.min(cnt/lim*100,100);
-  var cls  = pct>=100?"d":pct>=70?"w":"";
-  var isTeam = (id==="ideathon"||id==="rapidrush");
-  var lbl  = cnt>=lim ? "FULL" : cnt+"/"+lim+(isTeam?" pairs":" seats");
+  var cnt=getCount(id),lim=getLimitFor(id),pct=Math.min(cnt/lim*100,100);
+  var cls=pct>=100?"d":pct>=70?"w":"";
+  var isTeam=(id==="ideathon"||id==="rapidrush");
+  var lbl=cnt>=lim?"FULL":cnt+"/"+lim+(isTeam?" pairs":" seats");
   return '<div class="cap"><div class="cap-lbl">'+lbl+'</div>'
     +'<div class="cap-bar"><div class="cap-fill '+cls+'" style="width:'+pct+'%"></div></div></div>';
 }
 
-function renderTech(){
-  ALL_TECH_FULL = checkAllTechFull();
-  var sel  = S.techIds;
-  var maxT = S.maxTech;
-  var html = "";
+// ── JSONP HELPER ─────────────────────────────────────
+// BUG FIX: replaces fetch POST mode:no-cors so we can actually read success/failure
+function jsonpCall(params, onSuccess, onError) {
+  var cbName = "__gsJSONCB" + (++_cbCounter);
+  var timeout = setTimeout(function(){
+    delete window[cbName];
+    var s=document.getElementById(cbName+"_s");
+    if(s) s.parentNode.removeChild(s);
+    onError("Request timed out. Check your connection.");
+  }, 15000);
 
+  window[cbName] = function(res){
+    clearTimeout(timeout);
+    delete window[cbName];
+    var s=document.getElementById(cbName+"_s");
+    if(s) s.parentNode.removeChild(s);
+    onSuccess(res);
+  };
+
+  params.callback = cbName;
+  var qs = Object.keys(params).map(function(k){
+    return encodeURIComponent(k)+"="+encodeURIComponent(params[k]);
+  }).join("&");
+
+  var script = document.createElement("script");
+  script.id  = cbName+"_s";
+  script.src = SCRIPT_URL+"?"+qs;
+  script.onerror = function(){
+    clearTimeout(timeout);
+    delete window[cbName];
+    this.parentNode.removeChild(this);
+    onError("Network error. Check your connection.");
+  };
+  document.head.appendChild(script);
+}
+
+// ── RENDER ────────────────────────────────────────────
+function renderTech(){
+  ALL_TECH_FULL=checkAllTechFull();
+  var sel=S.techIds,maxT=S.maxTech,html="";
   if(ALL_TECH_FULL){
     for(var i=0;i<TECH.length;i++){
       var e=TECH[i];
-      html+='<div class="ev ev-full">'
-        +'<div class="ev-chk">&#10003;</div>'
+      html+='<div class="ev ev-full"><div class="ev-chk">&#10003;</div>'
         +'<div class="ev-name">'+e.label+'</div>'
         +'<div class="ev-badges"><span class="badge bt">Technical</span>'
         +(e.team?'<span class="badge bm">Team &middot; max 2</span>':'')+'</div>'
@@ -419,27 +441,18 @@ function renderTech(){
     document.getElementById("tech-full-notice").innerHTML="";
     document.getElementById("tech-info").style.display="flex";
     document.getElementById("tctr").style.display="inline-flex";
-    var csText;
-    if(S.preEnrolled && S.preIsTech){
-      csText="Optional \u2014 add 1 Tech, or skip to Non-Technical";
-    } else if(S.preEnrolled && !S.preIsTech){
-      csText="Select 1 Technical event \u2014 mandatory";
-    } else {
-      csText="Select 1 or 2 \u2014 mandatory";
-    }
+    var csText=S.preEnrolled&&S.preIsTech
+      ?"Optional \u2014 add 1 Tech, or skip to Non-Technical"
+      :S.preEnrolled&&!S.preIsTech
+      ?"Select 1 Technical event \u2014 mandatory"
+      :"Select 1 or 2 \u2014 mandatory";
     document.getElementById("tech-cs").textContent=csText;
-
     for(var j=0;j<TECH.length;j++){
-      var ev=TECH[j];
-      var cnt=getCount(ev.id);
-      var full=cnt>=getLimitFor(ev.id);
-      var idx=sel.indexOf(ev.id);
-      var isSel=idx>=0;
-      var locked=sel.length>=maxT&&!isSel;
+      var ev=TECH[j],cnt=getCount(ev.id),full=cnt>=getLimitFor(ev.id);
+      var idx=sel.indexOf(ev.id),isSel=idx>=0,locked=sel.length>=maxT&&!isSel;
       var cls=full?"ev-full":locked?"ev-off":isSel?(idx===0?"t1":"t2"):"";
-      html+='<div class="ev '+cls+'" id="te-'+ev.id+'" onclick="pickT(\''+ev.id+'\')">'
-        +'<div class="ev-chk">&#10003;</div>'
-        +'<div class="ev-name">'+ev.label+'</div>'
+      html+='<div class="ev '+cls+'" onclick="pickT(\''+ev.id+'\')">'
+        +'<div class="ev-chk">&#10003;</div><div class="ev-name">'+ev.label+'</div>'
         +'<div class="ev-badges"><span class="badge bt">Technical</span>'
         +(ev.team?'<span class="badge bm">Team &middot; max 2</span>':'')+'</div>'
         +capHTML(ev.id)+'</div>';
@@ -452,18 +465,12 @@ function renderTech(){
 }
 
 function renderNT(){
-  var twoTechPicked = (!ALL_TECH_FULL && S.techIds.length>=2);
-  var blocked = twoTechPicked || !S.canAddNonTech;
-  var html="";
+  var blocked=S.techIds.length>=2||!S.canAddNonTech,html="";
   for(var i=0;i<NONTECH.length;i++){
-    var e=NONTECH[i];
-    var cnt=getCount(e.id);
-    var full=cnt>=getLimitFor(e.id);
-    var sel=S.nonTechId===e.id;
+    var e=NONTECH[i],cnt=getCount(e.id),full=cnt>=getLimitFor(e.id),sel=S.nonTechId===e.id;
     var cls=full?"ev-full":blocked?"ev-off":sel?"nt":"";
-    html+='<div class="ev '+cls+'" id="nte-'+e.id+'" onclick="pickNT(\''+e.id+'\')">'
-      +'<div class="ev-chk">&#10003;</div>'
-      +'<div class="ev-name">'+e.label+'</div>'
+    html+='<div class="ev '+cls+'" onclick="pickNT(\''+e.id+'\')">'
+      +'<div class="ev-chk">&#10003;</div><div class="ev-name">'+e.label+'</div>'
       +'<div class="ev-badges"><span class="badge bn">Non-Technical</span>'
       +(e.team?'<span class="badge bm">Team &middot; max 2</span>':'')+'</div>'
       +capHTML(e.id)+'</div>';
@@ -474,36 +481,31 @@ function renderNT(){
 function pickT(id){
   if(ALL_TECH_FULL) return;
   var i=S.techIds.indexOf(id);
-  if(i>=0){
-    S.techIds.splice(i,1);
-    if(id==="ideathon") S.iMember=null;
-  } else {
+  if(i>=0){S.techIds.splice(i,1);if(id==="ideathon")S.iMember=null;}
+  else{
     if(S.techIds.length>=S.maxTech) return;
     if(getCount(id)>=getLimitFor(id)){alert(idToLabel(id)+" is FULL!");return;}
     S.techIds.push(id);
   }
-  S.canAddNonTech = S.preEnrolled
-    ? (S.preCanAddNonTech && S.techIds.length<2)
-    : S.techIds.length<2;
+  S.canAddNonTech=S.preEnrolled?(S.preCanAddNonTech&&S.techIds.length<2):S.techIds.length<2;
   renderTech();
   document.getElementById("ibox").classList.toggle("show",S.techIds.indexOf("ideathon")>=0);
 }
 
 function pickNT(id){
-  var twoTechPicked = S.techIds.length>=2;
-  if(twoTechPicked||!S.canAddNonTech) return;
+  if(S.techIds.length>=2||!S.canAddNonTech) return;
   if(getCount(id)>=getLimitFor(id)){alert(idToLabel(id)+" is FULL!");return;}
-  S.nonTechId = S.nonTechId===id ? null : id;
+  S.nonTechId=S.nonTechId===id?null:id;
   renderNT();
   document.getElementById("rbox").classList.toggle("show",S.nonTechId==="rapidrush");
 }
 
+// ── STEPPER ───────────────────────────────────────────
 function goTo(n){
   document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("active");});
   document.getElementById("p"+n).classList.add("active");
   for(var i=1;i<=4;i++){
-    var nd=document.getElementById("sn"+i);
-    var lb=document.getElementById("sl"+i);
+    var nd=document.getElementById("sn"+i),lb=document.getElementById("sl"+i);
     nd.classList.remove("active","done");
     if(lb) lb.classList.remove("active","done");
     if(i<n){nd.classList.add("done");nd.innerHTML="&#10003;";if(lb)lb.classList.add("done");}
@@ -515,111 +517,87 @@ function goTo(n){
 }
 
 function g(id){return document.getElementById(id).value.trim();}
-
 function showErr(id,msg){
   var el=document.getElementById(id);
   el.innerHTML='<div class="alert ae">&#9888;&#65039; '+msg+'</div>';
   el.scrollIntoView({behavior:"smooth",block:"center"});
 }
 function clearEl(id){document.getElementById(id).innerHTML="";}
+function setBtnLoading(id,on){
+  var b=document.getElementById(id);
+  if(!b) return;
+  b.disabled=on;
+  if(on) b.classList.add("loading"); else b.classList.remove("loading");
+}
 
+// ── STEP 1 ────────────────────────────────────────────
 function doStep1(){
   var reg=g("f-reg"),name=g("f-name"),dept=g("f-dept"),
       year=g("f-year"),ph=g("f-phone"),em=g("f-email");
-
   if(!reg||!name||!dept||!year||!ph||!em)
     return showErr("a1","Please fill in all fields.");
-
-  // FIX: reg number validation — must be 12 digits, no leading zero
   if(!isValidReg(reg))
     return showErr("a1","Register Number must be exactly 12 digits and cannot start with 0.");
-
-  // FIX: phone validation — must start with 6-9 (valid Indian mobile)
   if(!isValidPhone(ph))
-    return showErr("a1","Phone must be a valid 10-digit Indian mobile number (starting with 6, 7, 8, or 9).");
-
+    return showErr("a1","Phone must be a valid 10-digit mobile number starting with 6, 7, 8, or 9.");
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))
     return showErr("a1","Enter a valid email address.");
 
-  var btn=document.getElementById("btn1");
-  btn.disabled=true; btn.classList.add("loading");
-
-  fetch(SCRIPT_URL+"?action=check&reg="+encodeURIComponent(reg))
-  .then(function(r){return r.json();})
-  .then(function(res){
-    btn.disabled=false; btn.classList.remove("loading");
-
-    if(res.status==="duplicate"){
-      if(res.type==="individual"){
-        showErr("a1","Register number <strong>"+reg+"</strong> is already registered.");
-        return;
-      }
-      if(res.type==="team_member"){
-        S.preEnrolled      = true;
-        S.preEvent         = res.event;
-        S.preEventId       = res.eventId;
-        S.preIsTech        = res.isTechEvent;
-        S.preCanAddNonTech = (res.canAddNonTech!==undefined) ? res.canAddNonTech : res.isTechEvent;
-        if(S.preIsTech){
-          S.maxTech       = 1;
-          S.canAddNonTech = true;
-        } else {
-          S.maxTech       = 1;
-          S.canAddNonTech = false;
+  setBtnLoading("btn1",true);
+  jsonpCall({action:"check",reg:reg},
+    function(res){
+      setBtnLoading("btn1",false);
+      if(res.status==="duplicate"){
+        if(res.type==="individual"){
+          showErr("a1","Register number <strong>"+reg+"</strong> is already registered.");
+          return;
         }
+        if(res.type==="team_member"){
+          S.preEnrolled=true; S.preEvent=res.event; S.preEventId=res.eventId;
+          S.preIsTech=res.isTechEvent;
+          S.preCanAddNonTech=(res.canAddNonTech!==undefined)?res.canAddNonTech:res.isTechEvent;
+          S.maxTech=1;
+          S.canAddNonTech=S.preIsTech?true:false;
+        }
+      } else {
+        S.preEnrolled=false; S.preEvent=null; S.preEventId=null;
+        S.preIsTech=false; S.preCanAddNonTech=true;
+        S.maxTech=2; S.canAddNonTech=true;
       }
-    } else {
-      S.preEnrolled      = false;
-      S.preEvent         = null;
-      S.preEventId       = null;
-      S.preIsTech        = false;
-      S.preCanAddNonTech = true;
-      S.maxTech          = 2;
-      S.canAddNonTech    = true;
-    }
-
-    S.reg=reg; S.name=name; S.dept=dept; S.year=year; S.phone=ph; S.email=em;
-    clearEl("a1");
-
-    if(S.preEnrolled){
-      var ruleText = S.preIsTech
-        ? "You are pre-enrolled in <strong>"+S.preEvent+"</strong> (Tech). You may add <strong>1 more Tech</strong> OR <strong>1 Non-Technical event</strong> \u2014 not both. Or skip directly to Non-Technical."
-        : "You are pre-enrolled in <strong>"+S.preEvent+"</strong> (Non-Tech). You may add <strong>1 Technical event only</strong>. Non-Technical events are blocked.";
-      document.getElementById("pre-notice").innerHTML='<div class="alert aw">&#9888;&#65039; '+ruleText+'</div>';
-    } else {
-      document.getElementById("pre-notice").innerHTML="";
-    }
-
-    S.techIds=[];
-    fetch(SCRIPT_URL+"?action=counts")
-    .then(function(r){return r.json();})
-    .then(function(res2){
-      if(res2&&res2.counts)    LIVE_COUNTS=res2.counts;
-      if(res2&&res2.limits)    LIVE_LIMITS=res2.limits;
-      if(res2&&res2.soloLimit) SOLO_LIMIT=res2.soloLimit;
-      if(res2&&res2.teamLimit) TEAM_LIMIT=res2.teamLimit;
-      renderTech(); goTo(2);
-    })
-    .catch(function(){renderTech(); goTo(2);});
-  })
-  .catch(function(){
-    btn.disabled=false; btn.classList.remove("loading");
-    showErr("a1","Could not connect to server. Check your internet and try again.");
-  });
+      S.reg=reg; S.name=name; S.dept=dept; S.year=year; S.phone=ph; S.email=em;
+      clearEl("a1");
+      if(S.preEnrolled){
+        var rt=S.preIsTech
+          ?"You are pre-enrolled in <strong>"+S.preEvent+"</strong> (Tech). You may add <strong>1 more Tech</strong> OR <strong>1 Non-Technical event</strong> \u2014 not both."
+          :"You are pre-enrolled in <strong>"+S.preEvent+"</strong> (Non-Tech). You may add <strong>1 Technical event only</strong>.";
+        document.getElementById("pre-notice").innerHTML='<div class="alert aw">&#9888;&#65039; '+rt+'</div>';
+      } else {
+        document.getElementById("pre-notice").innerHTML="";
+      }
+      S.techIds=[];
+      jsonpCall({action:"counts"},function(res2){
+        if(res2&&res2.counts)    LIVE_COUNTS=res2.counts;
+        if(res2&&res2.limits)    LIVE_LIMITS=res2.limits;
+        if(res2&&res2.soloLimit) SOLO_LIMIT=res2.soloLimit;
+        if(res2&&res2.teamLimit) TEAM_LIMIT=res2.teamLimit;
+        renderTech(); goTo(2);
+      },function(){ renderTech(); goTo(2); });
+    },
+    function(err){ setBtnLoading("btn1",false); showErr("a1",err); }
+  );
 }
 
+// ── STEP 2 ────────────────────────────────────────────
 function doStep2(){
   if(ALL_TECH_FULL){
     S.techIds=[]; S.iMember=null;
     document.getElementById("nt-notice").innerHTML=
       '<div class="alert aw">&#9888;&#65039; All Technical events are full. Select 1 Non-Technical event to register.</div>';
-    S.nonTechId=null; renderNT(); goTo(3);
     document.getElementById("skipbtn").style.display="none";
-    return;
+    S.nonTechId=null; renderNT(); goTo(3); return;
   }
-
-  // Ideathon member: 0 tech → go to non-tech; 1 tech → submit
-  if(S.preEnrolled && S.preIsTech){
+  // Ideathon pre-enrolled member: 0 tech → go to non-tech; 1 tech → submit
+  if(S.preEnrolled&&S.preIsTech){
     if(S.techIds.indexOf("ideathon")>=0){
       var nm=g("i-name"),rg=g("i-reg"),em=g("i-email");
       if(!nm||!rg||!em) return alert("Fill in all Ideathon partner details.");
@@ -628,16 +606,15 @@ function doStep2(){
       S.iMember={name:nm,reg:rg,email:em};
     } else { S.iMember=null; }
     if(S.techIds.length>=1){ S.nonTechId=null; S.rrMember=null; doSubmit(); return; }
+    // 0 tech picked → show non-tech step
     S.canAddNonTech=true;
     document.getElementById("nt-notice").innerHTML=
-      '<div class="alert ai">&#8505;&#65039; You are pre-enrolled in <strong>'+S.preEvent+'</strong>. Select one Non-Technical event below, or skip.</div>';
+      '<div class="alert ai">&#8505;&#65039; You are pre-enrolled in <strong>'+S.preEvent+'</strong>. Optionally add one Non-Technical event, or skip.</div>';
     document.getElementById("skipbtn").style.display="block";
-    S.nonTechId=null; renderNT(); goTo(3);
-    return;
+    S.nonTechId=null; renderNT(); goTo(3); return;
   }
-
-  // Rapid Rush member: must pick 1 tech → submit
-  if(S.preEnrolled && !S.preIsTech){
+  // Rapid Rush pre-enrolled member: must pick 1 tech → submit
+  if(S.preEnrolled&&!S.preIsTech){
     if(S.techIds.length===0) return alert("Please select at least one Technical event.");
     if(S.techIds.indexOf("ideathon")>=0){
       var nm2=g("i-name"),rg2=g("i-reg"),em2=g("i-email");
@@ -646,10 +623,8 @@ function doStep2(){
       if(rg2===S.reg) return alert("Partner cannot have the same register number as you.");
       S.iMember={name:nm2,reg:rg2,email:em2};
     } else { S.iMember=null; }
-    S.nonTechId=null; S.rrMember=null; doSubmit();
-    return;
+    S.nonTechId=null; S.rrMember=null; doSubmit(); return;
   }
-
   // Normal flow
   if(S.techIds.length===0) return alert("Please select at least one Technical Event.");
   if(S.techIds.indexOf("ideathon")>=0){
@@ -659,10 +634,7 @@ function doStep2(){
     if(rg3===S.reg) return alert("Partner cannot have the same register number as you.");
     S.iMember={name:nm3,reg:rg3,email:em3};
   } else { S.iMember=null; }
-
-  // 2 tech → submit directly (no non-tech slot)
   if(S.techIds.length>=2){ S.nonTechId=null; S.rrMember=null; doSubmit(); return; }
-
   // 1 tech → offer non-tech
   document.getElementById("nt-notice").innerHTML=
     '<div class="alert ai">&#8505;&#65039; Optional \u2014 add one Non-Technical event, or skip below.</div>';
@@ -670,10 +642,10 @@ function doStep2(){
   S.nonTechId=null; renderNT(); goTo(3);
 }
 
+// ── STEP 3 ────────────────────────────────────────────
 function doStep3(){
-  if(ALL_TECH_FULL && !S.nonTechId)
-    return alert("Please select a Non-Technical event.");
-  if(S.preEnrolled && S.preIsTech && S.techIds.length===0 && !S.nonTechId)
+  if(ALL_TECH_FULL&&!S.nonTechId) return alert("Please select a Non-Technical event.");
+  if(S.preEnrolled&&S.preIsTech&&S.techIds.length===0&&!S.nonTechId)
     return alert("Please select a Non-Technical event, or go back and pick a Technical event.");
   if(S.nonTechId==="rapidrush"){
     var nm=g("r-name"),rg=g("r-reg"),em=g("r-email");
@@ -685,21 +657,20 @@ function doStep3(){
   doSubmit();
 }
 
-// FIX: doSkip — only submit if there's something to submit
-// Pre-enrolled members are fine (they already have an event)
-// Fresh registrants with no events at all → show error, don't submit
+// BUG FIX: Skip only submits if person actually has at least 1 event
+// (either a new tech event, or is pre-enrolled)
 function doSkip(){
-  if(!S.preEnrolled && S.techIds.length===0){
-    alert("You must select at least one Technical event before skipping Non-Technical.");
-    goTo(2);
-    return;
+  if(!S.preEnrolled&&S.techIds.length===0){
+    alert("You must select at least one Technical event before skipping.");
+    goTo(2); return;
   }
   S.nonTechId=null; S.rrMember=null; doSubmit();
 }
 
+// ── SUBMIT via JSONP — we can now READ the server response ────────────
 function doSubmit(){
-  var btn=document.getElementById("sbtn");
-  if(btn){btn.classList.add("loading");btn.disabled=true;}
+  setBtnLoading("sbtn",true);
+
   var techLabels=[];
   for(var i=0;i<S.techIds.length;i++){
     for(var j=0;j<TECH.length;j++){
@@ -710,6 +681,7 @@ function doSubmit(){
   for(var k=0;k<NONTECH.length;k++){
     if(NONTECH[k].id===S.nonTechId){ntLabel=NONTECH[k].label;break;}
   }
+
   var payload={
     timestamp:new Date().toISOString(),
     reg:S.reg,name:S.name,dept:S.dept,year:S.year,
@@ -720,18 +692,28 @@ function doSubmit(){
     isPreEnrolled:S.preEnrolled,preEvent:S.preEvent,
     preIsTech:S.preIsTech
   };
-  fetch(SCRIPT_URL,{
-    method:"POST",mode:"no-cors",
-    headers:{"Content-Type":"text/plain"},
-    body:JSON.stringify(payload)
-  })
-  .then(function(){showSuccess(payload,techLabels,ntLabel);})
-  .catch(function(){
-    if(btn){btn.classList.remove("loading");btn.disabled=false;}
-    alert("Network error \u2014 check connection and try again.");
-  });
+
+  // BUG FIX: use JSONP GET instead of fetch POST no-cors
+  // This way we can read success:true/false from the server response
+  jsonpCall(
+    {action:"submit", data:encodeURIComponent(JSON.stringify(payload))},
+    function(res){
+      setBtnLoading("sbtn",false);
+      if(res.success){
+        showSuccess(payload,techLabels,ntLabel);
+      } else {
+        // Server rejected — show the actual error message to the user
+        alert("Registration failed: " + (res.message||"Unknown error. Please try again."));
+      }
+    },
+    function(err){
+      setBtnLoading("sbtn",false);
+      alert("Network error \u2014 check your connection and try again.\n"+err);
+    }
+  );
 }
 
+// ── SUCCESS SCREEN ────────────────────────────────────
 function showSuccess(d,techLabels,ntLabel){
   goTo(4);
   document.getElementById("dp-name").textContent=d.name;
@@ -767,6 +749,7 @@ function showSuccess(d,techLabels,ntLabel){
   document.getElementById("confirms").innerHTML=c;
 }
 
+// ── RESET ─────────────────────────────────────────────
 function doReset(){
   S=freshState(); LIVE_COUNTS={}; LIVE_LIMITS={}; ALL_TECH_FULL=false;
   ["f-reg","f-name","f-phone","f-email","i-name","i-reg","i-email","r-name","r-reg","r-email"]
