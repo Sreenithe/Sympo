@@ -123,20 +123,20 @@ body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100
 .dp-brand{font-family:var(--fd);font-size:19px;letter-spacing:2px;color:#fff}
 .dp-brand span{color:var(--cyan)}
 .dp-college{font-size:10px;color:var(--muted2);margin-top:2px}
-.dp-id{font-family:var(--fd);font-size:12px;letter-spacing:2px;color:var(--orange)}
+.dp-badge{background:rgba(0,255,157,.08);border:1px solid rgba(0,255,157,.25);border-radius:6px;padding:4px 10px;font-size:10px;color:var(--green);font-weight:700;letter-spacing:1px}
 .dp-body{padding:22px}
-.dp-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.dp-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)}
 .dp-row:last-child{border:none}
 .dk{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:600}
-.dv{font-size:13px;color:var(--text);font-weight:500;text-align:right;max-width:58%}
-.dp-ev{margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
-.dp-ev-title{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600;margin-bottom:8px}
+.dv{font-size:13px;color:var(--text);font-weight:500;text-align:right;max-width:62%}
+.dp-ev{margin-top:16px;padding:14px;background:#080c14;border-radius:10px;border:1px solid var(--border)}
+.dp-ev-title{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600;margin-bottom:10px}
 .dp-chips{display:flex;flex-wrap:wrap;gap:7px}
 .chip{padding:5px 12px;border-radius:5px;font-size:11px;font-weight:600}
 .cht{background:rgba(0,229,255,.12);color:var(--cyan);border:1px solid rgba(0,229,255,.25)}
 .chn{background:rgba(255,107,26,.1);color:var(--orange2);border:1px solid rgba(255,107,26,.2)}
 .chp{background:rgba(255,208,96,.08);color:var(--yellow);border:1px solid rgba(255,208,96,.2)}
-.dp-team{margin-top:14px;padding:12px;background:rgba(0,229,255,.04);border:1px solid rgba(0,229,255,.1);border-radius:var(--rs)}
+.dp-team{margin-top:12px;padding:12px;background:rgba(0,229,255,.04);border:1px solid rgba(0,229,255,.1);border-radius:var(--rs)}
 .dp-team-title{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--cyan);font-weight:600;margin-bottom:8px}
 .wa-banner{display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:10px;text-decoration:none}
 .wa-icon{width:42px;height:42px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
@@ -153,7 +153,7 @@ footer span{color:var(--cyan)}
   <div><h1 class="hero-title">TECHNO<span class="tc">VANZA</span></h1><span class="hero-year">2 0 2 6</span></div>
   <p class="hero-sub">Annual Technical &amp; Cultural Symposium &middot; Event Registration</p>
   <div class="rules">
-    <div class="rule"><i></i>Min. 1 Event (Tech or Non-Tech)</div>
+    <div class="rule"><i></i>Min. 1 Event</div>
     <div class="rule"><i></i>Max. 2 Events Total</div>
     <div class="rule"><i></i>Teams Max 2 Members</div>
     <div class="rule"><i></i>Solo: 30 Seats &middot; Team: 15 Pairs</div>
@@ -271,11 +271,10 @@ footer span{color:var(--cyan)}
     <div class="dpass">
       <div class="dp-hdr">
         <div><div class="dp-brand"><span>TECHNO</span>VANZA 2026</div><div class="dp-college">Anjalai Ammal Mahalingam Engineering College</div></div>
-        <div class="dp-id" id="dp-id">&mdash;</div>
+        <div class="dp-badge">REGISTERED</div>
       </div>
       <div class="dp-body">
         <div class="dp-row"><span class="dk">Name</span><span class="dv" id="dp-name">&mdash;</span></div>
-        <div class="dp-row"><span class="dk">Reg. No.</span><span class="dv" id="dp-reg">&mdash;</span></div>
         <div class="dp-row"><span class="dk">Dept &amp; Year</span><span class="dv" id="dp-dept">&mdash;</span></div>
         <div class="dp-row"><span class="dk">Phone</span><span class="dv" id="dp-phone">&mdash;</span></div>
         <div class="dp-ev"><div class="dp-ev-title">Enrolled Events</div><div class="dp-chips" id="dp-evs"></div></div>
@@ -295,13 +294,12 @@ footer span{color:var(--cyan)}
 <footer>TECHNOVANZA 2026 &nbsp;&middot;&nbsp; Anjalai Ammal Mahalingam Engineering College &nbsp;&middot;&nbsp; <span>symposium@aamec.edu.in</span></footer>
 
 <script>
-var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyuu455_3i_QC8csABQtm7Ykzi2Gm-qyxa8FCCvCOxkgzb_PZ_AploDKZmztVB_x6_o/exec";
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxX5PywF6LAvQeQWWqiA84ya1-s29B_j9qId2eFkuIMXysnlHIu-ndGMs4ReZZtNhfJZg/exec";
 var WA_LINK    = "https://chat.whatsapp.com/HhRTOv148ZU9KobhO0J7El";
 
-// Per-event limits fetched from server; fallback defaults shown here
-var SOLO_LIMIT = 30;   // Prompt, Debugging, Coding, Photography, Meme, Chess
-var TEAM_LIMIT = 15;   // Ideathon (15 pairs), Rapid Rush (15 pairs)
-var LIVE_LIMITS = {};  // populated from server response
+var SOLO_LIMIT = 30;
+var TEAM_LIMIT = 15;
+var LIVE_LIMITS = {};
 var ALL_TECH_FULL = false;
 
 var TECH = [
@@ -326,26 +324,46 @@ function freshState(){
     techIds:[],nonTechId:null,
     iMember:null,rrMember:null,
     preEnrolled:false,preEvent:null,preEventId:null,preIsTech:false,
-    preCanAddNonTech:true,  // ← for Ideathon members: true; Rapid Rush members: false
+    preCanAddNonTech:true,
     maxTech:2,canAddNonTech:true
   };
 }
 
+// ── FIX: register number must not be all-zeros, must not start with 0 ──
 document.getElementById("f-reg").addEventListener("input",function(){
-  this.value=this.value.replace(/\D/g,"");
-  var h=document.getElementById("reg-hint");
-  var n=this.value.length;
+  this.value = this.value.replace(/\D/g,"");
+  var h = document.getElementById("reg-hint");
+  var n = this.value.length;
   if(n===0){h.textContent="Exactly 12 digits \u2014 numbers only";h.style.color="";}
   else if(n<12){h.textContent=n+" / 12 digits";h.style.color="var(--muted2)";}
   else{h.textContent="\u2713 12 digits";h.style.color="var(--green)";}
 });
 
+// ── FIX: phone must be digits only ────────────────────
+document.getElementById("f-phone").addEventListener("input",function(){
+  this.value = this.value.replace(/\D/g,"");
+});
+
+// ── partner reg fields: digits only ───────────────────
+["i-reg","r-reg"].forEach(function(id){
+  var el = document.getElementById(id);
+  if(el) el.addEventListener("input",function(){ this.value=this.value.replace(/\D/g,""); });
+});
+
+function isValidReg(r){
+  // Must be exactly 12 digits AND not all zeros AND not start with 0
+  return /^\d{12}$/.test(r) && !/^0/.test(r) && !/^0+$/.test(r);
+}
+
+function isValidPhone(p){
+  // 10 digits, must not start with 0 or be all zeros, must start with 6-9
+  return /^[6-9]\d{9}$/.test(p);
+}
+
 function getLimitFor(id){
-  // Team events count leaders (pairs); solo events count individuals
   var label = idToLabel(id);
   if(LIVE_LIMITS[label]) return LIVE_LIMITS[label];
-  var teamIds=["ideathon","rapidrush"];
-  return teamIds.indexOf(id)>=0 ? TEAM_LIMIT : SOLO_LIMIT;
+  return (id==="ideathon"||id==="rapidrush") ? TEAM_LIMIT : SOLO_LIMIT;
 }
 
 function idToLabel(id){
@@ -360,7 +378,7 @@ function getCount(id){
 
 function checkAllTechFull(){
   for(var i=0;i<TECH.length;i++){
-    if(getCount(TECH[i].id) < getLimitFor(TECH[i].id)) return false;
+    if(getCount(TECH[i].id)<getLimitFor(TECH[i].id)) return false;
   }
   return true;
 }
@@ -393,7 +411,7 @@ function renderTech(){
         +capHTML(e.id)+'</div>';
     }
     document.getElementById("tech-full-notice").innerHTML=
-      '<div class="alert aw" style="margin-bottom:12px">&#9888;&#65039; All Technical events are full. You may register for a <strong>Non-Technical event only</strong>. Click Continue below.</div>';
+      '<div class="alert aw" style="margin-bottom:12px">&#9888;&#65039; All Technical events are full. You may register for a <strong>Non-Technical event only</strong>. Click Continue.</div>';
     document.getElementById("tech-info").style.display="none";
     document.getElementById("tctr").style.display="none";
     document.getElementById("tech-cs").textContent="All Technical events are full";
@@ -401,14 +419,10 @@ function renderTech(){
     document.getElementById("tech-full-notice").innerHTML="";
     document.getElementById("tech-info").style.display="flex";
     document.getElementById("tctr").style.display="inline-flex";
-
-    // ── Determine subtitle based on pre-enrollment state ──────────────────
     var csText;
     if(S.preEnrolled && S.preIsTech){
-      // Pre-enrolled in Tech (Ideathon member): can pick 1 tech OR skip to non-tech
       csText="Optional \u2014 add 1 Tech, or skip to Non-Technical";
     } else if(S.preEnrolled && !S.preIsTech){
-      // Pre-enrolled in Non-Tech (Rapid Rush member): must pick 1 tech
       csText="Select 1 Technical event \u2014 mandatory";
     } else {
       csText="Select 1 or 2 \u2014 mandatory";
@@ -438,10 +452,6 @@ function renderTech(){
 }
 
 function renderNT(){
-  // Non-tech is blocked only if:
-  //  - User picked 2 tech events (no slots left)
-  //  - Pre-enrolled in Rapid Rush (non-tech): canAddNonTech = false
-  // NOT blocked if: pre-enrolled in Ideathon (tech) → canAddNonTech stays true
   var twoTechPicked = (!ALL_TECH_FULL && S.techIds.length>=2);
   var blocked = twoTechPicked || !S.canAddNonTech;
   var html="";
@@ -472,17 +482,16 @@ function pickT(id){
     if(getCount(id)>=getLimitFor(id)){alert(idToLabel(id)+" is FULL!");return;}
     S.techIds.push(id);
   }
-  // If a 2nd tech event is selected, block non-tech
   S.canAddNonTech = S.preEnrolled
-    ? S.preCanAddNonTech && S.techIds.length < 2
-    : S.techIds.length < 2;
+    ? (S.preCanAddNonTech && S.techIds.length<2)
+    : S.techIds.length<2;
   renderTech();
   document.getElementById("ibox").classList.toggle("show",S.techIds.indexOf("ideathon")>=0);
 }
 
 function pickNT(id){
   var twoTechPicked = S.techIds.length>=2;
-  if(twoTechPicked || !S.canAddNonTech) return;
+  if(twoTechPicked||!S.canAddNonTech) return;
   if(getCount(id)>=getLimitFor(id)){alert(idToLabel(id)+" is FULL!");return;}
   S.nonTechId = S.nonTechId===id ? null : id;
   renderNT();
@@ -497,26 +506,19 @@ function goTo(n){
     var lb=document.getElementById("sl"+i);
     nd.classList.remove("active","done");
     if(lb) lb.classList.remove("active","done");
-    if(i<n){
-      nd.classList.add("done");
-      nd.innerHTML="&#10003;";
-      if(lb) lb.classList.add("done");
-    } else if(i===n){
-      nd.classList.add("active");
-      nd.textContent = i<4 ? String(i) : "\u2713";
-      if(lb) lb.classList.add("active");
-    } else {
-      nd.textContent = i<4 ? String(i) : "\u2713";
-    }
+    if(i<n){nd.classList.add("done");nd.innerHTML="&#10003;";if(lb)lb.classList.add("done");}
+    else if(i===n){nd.classList.add("active");nd.textContent=i<4?String(i):"\u2713";if(lb)lb.classList.add("active");}
+    else{nd.textContent=i<4?String(i):"\u2713";}
     if(i<4) document.getElementById("st"+i).classList.toggle("done",i<n);
   }
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
 function g(id){return document.getElementById(id).value.trim();}
+
 function showErr(id,msg){
   var el=document.getElementById(id);
-  el.innerHTML='<div class="alert ae">'+msg+'</div>';
+  el.innerHTML='<div class="alert ae">&#9888;&#65039; '+msg+'</div>';
   el.scrollIntoView({behavior:"smooth",block:"center"});
 }
 function clearEl(id){document.getElementById(id).innerHTML="";}
@@ -524,14 +526,21 @@ function clearEl(id){document.getElementById(id).innerHTML="";}
 function doStep1(){
   var reg=g("f-reg"),name=g("f-name"),dept=g("f-dept"),
       year=g("f-year"),ph=g("f-phone"),em=g("f-email");
+
   if(!reg||!name||!dept||!year||!ph||!em)
     return showErr("a1","Please fill in all fields.");
-  if(!/^\d{12}$/.test(reg))
-    return showErr("a1","Register Number must be exactly 12 digits, numbers only.");
-  if(!/^\d{10}$/.test(ph))
-    return showErr("a1","Phone must be exactly 10 digits.");
+
+  // FIX: reg number validation — must be 12 digits, no leading zero
+  if(!isValidReg(reg))
+    return showErr("a1","Register Number must be exactly 12 digits and cannot start with 0.");
+
+  // FIX: phone validation — must start with 6-9 (valid Indian mobile)
+  if(!isValidPhone(ph))
+    return showErr("a1","Phone must be a valid 10-digit Indian mobile number (starting with 6, 7, 8, or 9).");
+
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))
     return showErr("a1","Enter a valid email address.");
+
   var btn=document.getElementById("btn1");
   btn.disabled=true; btn.classList.add("loading");
 
@@ -542,24 +551,21 @@ function doStep1(){
 
     if(res.status==="duplicate"){
       if(res.type==="individual"){
-        showErr("a1","Register number "+reg+" is already registered.");
+        showErr("a1","Register number <strong>"+reg+"</strong> is already registered.");
         return;
       }
       if(res.type==="team_member"){
-        S.preEnrolled     = true;
-        S.preEvent        = res.event;
-        S.preEventId      = res.eventId;
-        S.preIsTech       = res.isTechEvent;
-        S.preCanAddNonTech= (res.canAddNonTech !== undefined) ? res.canAddNonTech : res.isTechEvent;
-
+        S.preEnrolled      = true;
+        S.preEvent         = res.event;
+        S.preEventId       = res.eventId;
+        S.preIsTech        = res.isTechEvent;
+        S.preCanAddNonTech = (res.canAddNonTech!==undefined) ? res.canAddNonTech : res.isTechEvent;
         if(S.preIsTech){
-          // Ideathon member: can add 1 more tech OR 1 non-tech (not both)
-          S.maxTech        = 1;
-          S.canAddNonTech  = true;   // ← KEY FIX: Ideathon members CAN pick non-tech
+          S.maxTech       = 1;
+          S.canAddNonTech = true;
         } else {
-          // Rapid Rush member: can only add 1 tech; non-tech blocked
-          S.maxTech        = 1;
-          S.canAddNonTech  = false;
+          S.maxTech       = 1;
+          S.canAddNonTech = false;
         }
       }
     } else {
@@ -576,30 +582,20 @@ function doStep1(){
     clearEl("a1");
 
     if(S.preEnrolled){
-      var ruleText;
-      if(S.preIsTech){
-        // Ideathon member
-        ruleText = "You are pre-enrolled in <strong>"+S.preEvent+"</strong> (Tech). "
-          +"You may add <strong>1 more Technical</strong> OR <strong>1 Non-Technical event</strong> \u2014 not both. "
-          +"Or skip directly to Non-Technical below.";
-      } else {
-        // Rapid Rush member
-        ruleText = "You are pre-enrolled in <strong>"+S.preEvent+"</strong> (Non-Tech). "
-          +"You may add <strong>1 Technical event only</strong>. Non-Technical events are blocked.";
-      }
-      document.getElementById("pre-notice").innerHTML=
-        '<div class="alert aw">&#9888;&#65039; '+ruleText+'</div>';
+      var ruleText = S.preIsTech
+        ? "You are pre-enrolled in <strong>"+S.preEvent+"</strong> (Tech). You may add <strong>1 more Tech</strong> OR <strong>1 Non-Technical event</strong> \u2014 not both. Or skip directly to Non-Technical."
+        : "You are pre-enrolled in <strong>"+S.preEvent+"</strong> (Non-Tech). You may add <strong>1 Technical event only</strong>. Non-Technical events are blocked.";
+      document.getElementById("pre-notice").innerHTML='<div class="alert aw">&#9888;&#65039; '+ruleText+'</div>';
     } else {
       document.getElementById("pre-notice").innerHTML="";
     }
 
     S.techIds=[];
-    // Fetch live counts & limits
     fetch(SCRIPT_URL+"?action=counts")
     .then(function(r){return r.json();})
     .then(function(res2){
-      if(res2&&res2.counts)  LIVE_COUNTS=res2.counts;
-      if(res2&&res2.limits)  LIVE_LIMITS=res2.limits;
+      if(res2&&res2.counts)    LIVE_COUNTS=res2.counts;
+      if(res2&&res2.limits)    LIVE_LIMITS=res2.limits;
       if(res2&&res2.soloLimit) SOLO_LIMIT=res2.soloLimit;
       if(res2&&res2.teamLimit) TEAM_LIMIT=res2.teamLimit;
       renderTech(); goTo(2);
@@ -613,7 +609,6 @@ function doStep1(){
 }
 
 function doStep2(){
-  // ── All tech full: skip tech step, go to non-tech ─────
   if(ALL_TECH_FULL){
     S.techIds=[]; S.iMember=null;
     document.getElementById("nt-notice").innerHTML=
@@ -623,93 +618,84 @@ function doStep2(){
     return;
   }
 
-  // ── Pre-enrolled in Tech (Ideathon member) ───────────
-  // They may have picked 0 tech events and want to go straight to non-tech — that's fine!
+  // Ideathon member: 0 tech → go to non-tech; 1 tech → submit
   if(S.preEnrolled && S.preIsTech){
-    // Validate ideathon partner if they picked ideathon
     if(S.techIds.indexOf("ideathon")>=0){
       var nm=g("i-name"),rg=g("i-reg"),em=g("i-email");
       if(!nm||!rg||!em) return alert("Fill in all Ideathon partner details.");
-      if(!/^\d{12}$/.test(rg)) return alert("Partner register number must be 12 digits.");
+      if(!isValidReg(rg)) return alert("Partner register number must be 12 digits and not start with 0.");
       if(rg===S.reg) return alert("Partner cannot have the same register number as you.");
       S.iMember={name:nm,reg:rg,email:em};
-    } else {
-      S.iMember=null;
-    }
-    // Determine if non-tech is still allowed
-    // If they picked 1 tech, non-tech is blocked (would be 3 events total with pre-enroll)
-    if(S.techIds.length>=1){
-      // They picked a tech → submit now (pre-enroll tech + new tech = 2 events)
-      S.nonTechId=null; S.rrMember=null; doSubmit();
-      return;
-    }
-    // They picked 0 tech → go to non-tech step
+    } else { S.iMember=null; }
+    if(S.techIds.length>=1){ S.nonTechId=null; S.rrMember=null; doSubmit(); return; }
     S.canAddNonTech=true;
-    var ntMsg='<div class="alert ai">&#8505;&#65039; You are pre-enrolled in <strong>'+S.preEvent+'</strong>. '
-      +'Select one Non-Technical event below, or skip.</div>';
-    document.getElementById("nt-notice").innerHTML=ntMsg;
+    document.getElementById("nt-notice").innerHTML=
+      '<div class="alert ai">&#8505;&#65039; You are pre-enrolled in <strong>'+S.preEvent+'</strong>. Select one Non-Technical event below, or skip.</div>';
     document.getElementById("skipbtn").style.display="block";
     S.nonTechId=null; renderNT(); goTo(3);
     return;
   }
 
-  // ── Pre-enrolled in Non-Tech (Rapid Rush member) ─────
+  // Rapid Rush member: must pick 1 tech → submit
   if(S.preEnrolled && !S.preIsTech){
-    if(S.techIds.length===0)
-      return alert("Please select at least one Technical event.");
+    if(S.techIds.length===0) return alert("Please select at least one Technical event.");
     if(S.techIds.indexOf("ideathon")>=0){
       var nm2=g("i-name"),rg2=g("i-reg"),em2=g("i-email");
       if(!nm2||!rg2||!em2) return alert("Fill in all Ideathon partner details.");
-      if(!/^\d{12}$/.test(rg2)) return alert("Partner register number must be 12 digits.");
+      if(!isValidReg(rg2)) return alert("Partner register number must be 12 digits and not start with 0.");
       if(rg2===S.reg) return alert("Partner cannot have the same register number as you.");
       S.iMember={name:nm2,reg:rg2,email:em2};
-    } else {S.iMember=null;}
-    // Non-tech already pre-enrolled, so skip non-tech step
+    } else { S.iMember=null; }
     S.nonTechId=null; S.rrMember=null; doSubmit();
     return;
   }
 
-  // ── Normal (not pre-enrolled) ────────────────────────
-  if(S.techIds.length===0)
-    return alert("Please select at least one Technical Event.");
+  // Normal flow
+  if(S.techIds.length===0) return alert("Please select at least one Technical Event.");
   if(S.techIds.indexOf("ideathon")>=0){
     var nm3=g("i-name"),rg3=g("i-reg"),em3=g("i-email");
     if(!nm3||!rg3||!em3) return alert("Fill in all Ideathon partner details.");
-    if(!/^\d{12}$/.test(rg3)) return alert("Partner register number must be 12 digits.");
+    if(!isValidReg(rg3)) return alert("Partner register number must be 12 digits and not start with 0.");
     if(rg3===S.reg) return alert("Partner cannot have the same register number as you.");
     S.iMember={name:nm3,reg:rg3,email:em3};
-  } else {S.iMember=null;}
+  } else { S.iMember=null; }
 
-  // If 2 tech events picked → go straight to submit (no non-tech slot)
-  if(S.techIds.length>=2){
-    S.nonTechId=null; S.rrMember=null; doSubmit();
-    return;
-  }
+  // 2 tech → submit directly (no non-tech slot)
+  if(S.techIds.length>=2){ S.nonTechId=null; S.rrMember=null; doSubmit(); return; }
 
-  // 1 tech picked → offer non-tech
-  var ntMsg2='<div class="alert ai">&#8505;&#65039; Optional \u2014 add one Non-Technical event, or skip below.</div>';
-  document.getElementById("nt-notice").innerHTML=ntMsg2;
+  // 1 tech → offer non-tech
+  document.getElementById("nt-notice").innerHTML=
+    '<div class="alert ai">&#8505;&#65039; Optional \u2014 add one Non-Technical event, or skip below.</div>';
   document.getElementById("skipbtn").style.display="block";
   S.nonTechId=null; renderNT(); goTo(3);
 }
 
 function doStep3(){
-  if(ALL_TECH_FULL&&!S.nonTechId)
+  if(ALL_TECH_FULL && !S.nonTechId)
     return alert("Please select a Non-Technical event.");
-  // Also enforce: if Ideathon member went to non-tech step without picking tech, they need a non-tech
-  if(S.preEnrolled&&S.preIsTech&&S.techIds.length===0&&!S.nonTechId)
+  if(S.preEnrolled && S.preIsTech && S.techIds.length===0 && !S.nonTechId)
     return alert("Please select a Non-Technical event, or go back and pick a Technical event.");
   if(S.nonTechId==="rapidrush"){
     var nm=g("r-name"),rg=g("r-reg"),em=g("r-email");
     if(!nm||!rg||!em) return alert("Fill in all Rapid Rush partner details.");
-    if(!/^\d{12}$/.test(rg)) return alert("Partner register number must be 12 digits.");
+    if(!isValidReg(rg)) return alert("Partner register number must be 12 digits and not start with 0.");
     if(rg===S.reg) return alert("Partner cannot be the same person as you.");
     S.rrMember={name:nm,reg:rg,email:em};
-  } else {S.rrMember=null;}
+  } else { S.rrMember=null; }
   doSubmit();
 }
 
-function doSkip(){S.nonTechId=null; S.rrMember=null; doSubmit();}
+// FIX: doSkip — only submit if there's something to submit
+// Pre-enrolled members are fine (they already have an event)
+// Fresh registrants with no events at all → show error, don't submit
+function doSkip(){
+  if(!S.preEnrolled && S.techIds.length===0){
+    alert("You must select at least one Technical event before skipping Non-Technical.");
+    goTo(2);
+    return;
+  }
+  S.nonTechId=null; S.rrMember=null; doSubmit();
+}
 
 function doSubmit(){
   var btn=document.getElementById("sbtn");
@@ -748,14 +734,12 @@ function doSubmit(){
 
 function showSuccess(d,techLabels,ntLabel){
   goTo(4);
-  document.getElementById("dp-id").textContent="REG/"+d.reg;
   document.getElementById("dp-name").textContent=d.name;
-  document.getElementById("dp-reg").textContent=d.reg;
   document.getElementById("dp-dept").textContent=d.dept+" \u00b7 "+d.year;
   document.getElementById("dp-phone").textContent=d.phone;
   var chips="";
   if(d.isPreEnrolled&&d.preEvent)
-    chips+='<span class="chip chp">'+d.preEvent+' \u2014 Pre-enrolled (Team Member)</span>';
+    chips+='<span class="chip chp">'+d.preEvent+' \u2014 Pre-enrolled</span>';
   for(var i=0;i<techLabels.length;i++)
     chips+='<span class="chip cht">'+techLabels[i]+(d.techIds[i]==="ideathon"&&d.iTeamMember?" \u2014 Leader":"")+'</span>';
   if(ntLabel)
