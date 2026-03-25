@@ -160,7 +160,7 @@ footer span{color:var(--cyan)}
     <div class="rule"><i></i>Min. 1 Event (Tech or Non-Tech)</div>
     <div class="rule"><i></i>Max. 2 Events Total</div>
     <div class="rule"><i></i>Teams Max 2 Members</div>
-    <div class="rule"><i></i>Solo: 30 Seats &middot; Team: 15 Pairs</div>
+    <div class="rule"><i></i>Solo: 100 Seats &middot; Team: 50 Pairs</div>
   </div>
 </div>
 
@@ -312,11 +312,13 @@ footer span{color:var(--cyan)}
 
 <script>
 // ── CONFIG ──────────────────────────────────────────────────────────────────
-var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyuu455_3i_QC8csABQtm7Ykzi2Gm-qyxa8FCCvCOxkgzb_PZ_AploDKZmztVB_x6_o/exec";
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyguRB6pfTQGqSPFogngTjnCHIwga4URV9ZduEn2Xdq9UZK0Gr5IaMy5p1mrJqjg6iC/exec";
 var WA_LINK    = "https://chat.whatsapp.com/HhRTOv148ZU9KobhO0J7El";
 
-var SOLO_LIMIT = 100;
-var TEAM_LIMIT = 50;
+// ── LIMITS (must match Code.gs CFG values) ──────────────────────────────────
+var SOLO_LIMIT = 100;   // seats per individual event
+var TEAM_LIMIT = 50;    // pairs per team event
+
 var LIVE_LIMITS = {};
 var ALL_TECH_FULL = false;
 
@@ -336,8 +338,7 @@ var NONTECH = [
 var LIVE_COUNTS = {};
 var S = freshState();
 
-// Tracks regs that have been submitted THIS session to block duplicate submits
-// after a no-cors POST (we can't read the response, so we track locally)
+// Tracks regs submitted THIS session — blocks duplicate submits after no-cors POST
 var SUBMITTED_REGS = {};
 
 function freshState(){
@@ -352,29 +353,16 @@ function freshState(){
 }
 
 // ── VALIDATION HELPERS ──────────────────────────────────────────────────────
-
-/**
- * BUG FIX #1: Reg number validation
- * - Must be exactly 12 digits
- * - Must NOT be all zeros
- * - Must NOT start with 0 (reg numbers are typically non-zero leading)
- */
 function isValidReg(v){
   if(!/^\d{12}$/.test(v)) return false;
-  if(/^0/.test(v)) return false;          // no leading zero
-  if(/^0+$/.test(v)) return false;        // not all zeros
+  if(/^0/.test(v)) return false;
+  if(/^0+$/.test(v)) return false;
   return true;
 }
 
-/**
- * BUG FIX #2: Phone validation
- * - Must be exactly 10 digits
- * - Must NOT start with 0
- * - Must start with 6, 7, 8, or 9 (valid Indian mobile)
- */
 function isValidPhone(v){
   if(!/^\d{10}$/.test(v)) return false;
-  if(!/^[6-9]/.test(v)) return false;    // Indian mobile: starts 6–9
+  if(!/^[6-9]/.test(v)) return false;
   return true;
 }
 
@@ -382,21 +370,20 @@ function isValidPhone(v){
 document.getElementById("f-reg").addEventListener("input", function(){
   this.value = this.value.replace(/\D/g,"");
   var h = document.getElementById("reg-hint");
-  var inp = this;
   var n = this.value.length;
   if(n === 0){
     h.textContent = "Exactly 12 digits \u2014 numbers only";
-    h.className = "hint"; inp.className = "";
+    h.className = "hint"; this.className = "";
   } else if(n < 12){
     h.textContent = n + " / 12 digits";
-    h.className = "hint"; inp.className = "";
+    h.className = "hint"; this.className = "";
   } else {
     if(isValidReg(this.value)){
       h.textContent = "\u2713 Valid register number";
-      h.className = "hint ok"; inp.className = "ok";
+      h.className = "hint ok"; this.className = "ok";
     } else {
       h.textContent = "\u2717 Cannot start with 0";
-      h.className = "hint err"; inp.className = "err";
+      h.className = "hint err"; this.className = "err";
     }
   }
 });
@@ -404,26 +391,24 @@ document.getElementById("f-reg").addEventListener("input", function(){
 document.getElementById("f-phone").addEventListener("input", function(){
   this.value = this.value.replace(/\D/g,"");
   var h = document.getElementById("phone-hint");
-  var inp = this;
   var n = this.value.length;
   if(n === 0){
     h.textContent = "Must be 10 digits, cannot start with 0";
-    h.className = "hint"; inp.className = "";
+    h.className = "hint"; this.className = "";
   } else if(n < 10){
     h.textContent = n + " / 10 digits";
-    h.className = "hint"; inp.className = "";
+    h.className = "hint"; this.className = "";
   } else {
     if(isValidPhone(this.value)){
       h.textContent = "\u2713 Valid phone number";
-      h.className = "hint ok"; inp.className = "ok";
+      h.className = "hint ok"; this.className = "ok";
     } else {
       h.textContent = "\u2717 Must start with 6, 7, 8 or 9";
-      h.className = "hint err"; inp.className = "err";
+      h.className = "hint err"; this.className = "err";
     }
   }
 });
 
-// Live reg hint for partner fields
 function attachRegHint(inputId, hintId){
   var inp = document.getElementById(inputId);
   if(!inp) return;
@@ -629,18 +614,15 @@ function doStep1(){
   if(!reg||!name||!dept||!year||!ph||!em)
     return showErr("a1","Please fill in all fields.");
 
-  // BUG FIX #1: Strict reg validation — no leading zeros, exactly 12 digits
   if(!isValidReg(reg))
     return showErr("a1","Register Number must be exactly 12 digits and cannot start with 0.");
 
-  // BUG FIX #2: Strict phone validation — starts with 6–9, no leading zeros
   if(!isValidPhone(ph))
     return showErr("a1","Phone must be 10 digits and start with 6, 7, 8 or 9.");
 
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))
     return showErr("a1","Enter a valid email address.");
 
-  // BUG FIX #5: Block resubmit if this reg was already submitted this session
   if(SUBMITTED_REGS[reg])
     return showErr("a1","This register number was already submitted in this session. Please refresh if you need to start over.");
 
@@ -780,7 +762,6 @@ function doStep2(){
 function validateIdeathonPartner(){
   var nm=g("i-name"), rg=g("i-reg"), em=g("i-email");
   if(!nm||!rg||!em){ showErr("tech-full-notice","Fill in all Ideathon partner details."); return false;}
-  // BUG FIX #1: validate partner reg too
   if(!isValidReg(rg)){ showErr("tech-full-notice","Partner register number must be 12 digits and cannot start with 0."); return false;}
   if(rg===S.reg){ showErr("tech-full-notice","Partner cannot have the same register number as you."); return false;}
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ showErr("tech-full-notice","Enter a valid email for the partner."); return false;}
@@ -791,7 +772,6 @@ function validateIdeathonPartner(){
 function validateRRPartner(){
   var nm=g("r-name"), rg=g("r-reg"), em=g("r-email");
   if(!nm||!rg||!em){ showErr("nt-notice","Fill in all Rapid Rush partner details."); return false;}
-  // BUG FIX #1: validate partner reg too
   if(!isValidReg(rg)){ showErr("nt-notice","Partner register number must be 12 digits and cannot start with 0."); return false;}
   if(rg===S.reg){ showErr("nt-notice","Partner cannot be the same person as you."); return false;}
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ showErr("nt-notice","Enter a valid email for the partner."); return false;}
@@ -815,7 +795,6 @@ function doSkip(){S.nonTechId=null; S.rrMember=null; doSubmit();}
 
 // ── SUBMIT ────────────────────────────────────────────────────────────────────
 function doSubmit(){
-  // BUG FIX #5: Prevent double submit
   if(SUBMITTED_REGS[S.reg]){
     showErr("nt-notice","This registration was already submitted. Please refresh to start over.");
     return;
@@ -848,11 +827,9 @@ function doSubmit(){
     preIsTech:S.preIsTech
   };
 
-  // BUG FIX #5: Mark as submitted BEFORE the fetch so double-clicks are blocked
+  // Mark submitted BEFORE fetch to block double-clicks
   SUBMITTED_REGS[S.reg] = true;
 
-  // NOTE: mode:"no-cors" cannot read the response — we trust the server
-  // and show success. The server-side duplicate check is the real guard.
   fetch(SCRIPT_URL,{
     method:"POST",
     mode:"no-cors",
@@ -863,7 +840,7 @@ function doSubmit(){
     showSuccess(payload,techLabels,ntLabel);
   })
   .catch(function(){
-    // BUG FIX #5: On network error, unmark so user can retry
+    // On network error, unmark so user can retry
     delete SUBMITTED_REGS[S.reg];
     if(sbtn){sbtn.classList.remove("loading");sbtn.disabled=false;}
     if(skipbtn){skipbtn.style.pointerEvents="";skipbtn.style.opacity="";}
@@ -916,15 +893,13 @@ function showSuccess(d,techLabels,ntLabel){
 function doReset(){
   S=freshState();
   LIVE_COUNTS={}; LIVE_LIMITS={}; ALL_TECH_FULL=false;
-  // NOTE: We do NOT clear SUBMITTED_REGS — that persists for the session
-  // to prevent re-registration of already-submitted reg numbers.
+  // SUBMITTED_REGS persists — prevents re-registration this session
 
   ["f-reg","f-name","f-phone","f-email","i-name","i-reg","i-email","r-name","r-reg","r-email"]
     .forEach(function(id){var el=document.getElementById(id);if(el){el.value="";el.className="";}});
   document.getElementById("f-dept").value="";
   document.getElementById("f-year").value="";
 
-  // Reset hints
   var rh=document.getElementById("reg-hint");
   if(rh){rh.textContent="Exactly 12 digits \u2014 numbers only";rh.className="hint";}
   var ph=document.getElementById("phone-hint");
